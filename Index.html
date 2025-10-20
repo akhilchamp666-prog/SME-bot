@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+    <title>SME Bot</title>
+    <style>
+        body { font-family: Arial; background: #f0f0f0; padding: 20px; }
+        h1 { text-align:center; color:#333; }
+        #chat-container { width:60%; margin:auto; background:white; border:1px solid #ccc; padding:15px; border-radius:10px; }
+        #chat { border:1px solid #ccc; padding:10px; height:400px; overflow-y:scroll; background:#fafafa; }
+        .message { margin:10px; padding:8px 12px; border-radius:10px; max-width:80%; clear:both; }
+        .user { background:#cce5ff; color:#004085; float:right; text-align:right; }
+        .bot { background:#d4edda; color:#155724; float:left; text-align:left; }
+        #input-container { margin-top:10px; display:flex; }
+        #message { flex:1; padding:8px; font-size:14px; border-radius:5px; border:1px solid #ccc; }
+        #send-btn { padding:8px 12px; margin-left:5px; font-size:14px; border-radius:5px; border:none; background:#28a745; color:white; cursor:pointer; }
+        #send-btn:hover { background:#218838; }
+        .clear { clear:both; }
+    </style>
+</head>
+<body>
+    <h1>SME Bot</h1>
+    <div id="chat-container">
+        <div id="chat"></div>
+        <div id="input-container">
+            <input type="text" id="message" placeholder="Type here..." autofocus>
+            <button id="send-btn" onclick="sendMessage()">Enter</button>
+        </div>
+    </div>
+
+    <script>
+        function appendMessage(sender, text){
+            const chat = document.getElementById('chat');
+            let emoji = sender === 'You' ? '🧑' : '🤖';
+            let msgClass = sender === 'You' ? 'user' : 'bot';
+            chat.innerHTML += '<div class="message '+msgClass+'">'+emoji+' <b>'+sender+':</b> '+text+'</div><div class="clear"></div>';
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function sendMessage(){
+            const input = document.getElementById('message');
+            const msg = input.value.trim();
+            if(!msg) return;
+            appendMessage('You', msg);
+            fetch('/chat', {
+                method:'POST',
+                headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                body:'message='+encodeURIComponent(msg)
+            }).then(res=>res.text())
+              .then(data=>appendMessage('SME', data));
+            input.value='';
+        }
+
+        document.getElementById('message').addEventListener("keypress", function(e){
+            if(e.key === "Enter"){ sendMessage(); }
+        });
+    </script>
+</body>
+</html>
